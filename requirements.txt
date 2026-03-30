@@ -1,0 +1,5 @@
+flask
+PyMuPDF
+transformers
+sentencepiece
+torch

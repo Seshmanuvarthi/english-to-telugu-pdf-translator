@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>English to Telugu PDF Translator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container { width: 100%; max-width: 520px; }
+
+    .card {
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 48px 40px;
+      box-shadow: 0 32px 64px rgba(0, 0, 0, 0.3);
+    }
+
+    .logo { text-align: center; margin-bottom: 8px; }
+    .logo-icon { font-size: 48px; margin-bottom: 4px; }
+
+    h1 {
+      text-align: center;
+      font-size: 24px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 4px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 14px;
+      margin-bottom: 36px;
+    }
+
+    .lang-badges {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .badge {
+      padding: 8px 18px;
+      border-radius: 50px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-en {
+      background: rgba(99, 102, 241, 0.2);
+      color: #a5b4fc;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+
+    .badge-te {
+      background: rgba(234, 179, 8, 0.15);
+      color: #fcd34d;
+      border: 1px solid rgba(234, 179, 8, 0.25);
+    }
+
+    .arrow { color: rgba(255, 255, 255, 0.3); font-size: 18px; }
+
+    /* Drop zone */
+    .drop-zone {
+      border: 2px dashed rgba(255, 255, 255, 0.15);
+      border-radius: 16px;
+      padding: 40px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-bottom: 24px;
+    }
+
+    .drop-zone:hover, .drop-zone.dragover {
+      border-color: rgba(99, 102, 241, 0.5);
+      background: rgba(99, 102, 241, 0.05);
+    }
+
+    .drop-zone-icon { font-size: 40px; margin-bottom: 12px; }
+    .drop-zone-text { color: rgba(255, 255, 255, 0.7); font-size: 15px; font-weight: 500; }
+    .drop-zone-hint { color: rgba(255, 255, 255, 0.35); font-size: 12px; margin-top: 8px; }
+
+    /* File info */
+    .file-info {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 18px;
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      border-radius: 12px;
+      margin-bottom: 24px;
+      color: #c7d2fe;
+      font-size: 14px;
+    }
+
+    .file-info.visible { display: flex; }
+    .file-info-icon { font-size: 20px; }
+    .file-info-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .file-info-remove {
+      cursor: pointer;
+      color: rgba(255, 255, 255, 0.4);
+      transition: color 0.2s;
+      font-size: 18px;
+      background: none;
+      border: none;
+    }
+
+    .file-info-remove:hover { color: #f87171; }
+
+    input[type="file"] { display: none; }
+
+    /* Buttons */
+    .btn {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 14px;
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: white;
+      box-shadow: 0 4px 24px rgba(99, 102, 241, 0.35);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(99, 102, 241, 0.45);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      box-shadow: 0 4px 24px rgba(16, 185, 129, 0.35);
+      margin-top: 16px;
+    }
+
+    .btn-success:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(16, 185, 129, 0.45);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    /* Progress section */
+    .progress-section {
+      display: none;
+      margin-bottom: 24px;
+    }
+
+    .progress-section.visible { display: block; }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .progress-percent {
+      font-size: 28px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .progress-page {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.5);
+      font-weight: 500;
+      background: rgba(255, 255, 255, 0.06);
+      padding: 6px 14px;
+      border-radius: 50px;
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #6366f1, #a78bfa, #8b5cf6);
+      background-size: 200% 100%;
+      border-radius: 10px;
+      transition: width 0.5s ease;
+      animation: shimmer 2s ease infinite;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    .progress-message {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-top-color: #a78bfa;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Done section */
+    .done-section { display: none; }
+    .done-section.visible { display: block; }
+
+    .done-banner {
+      text-align: center;
+      padding: 24px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      border-radius: 16px;
+      margin-bottom: 8px;
+    }
+
+    .done-icon { font-size: 40px; margin-bottom: 8px; }
+
+    .done-title {
+      color: #6ee7b7;
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .done-subtitle {
+      color: rgba(255, 255, 255, 0.45);
+      font-size: 13px;
+    }
+
+    .btn-reset {
+      width: 100%;
+      padding: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      background: transparent;
+      color: rgba(255, 255, 255, 0.6);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 10px;
+    }
+
+    .btn-reset:hover {
+      border-color: rgba(255, 255, 255, 0.25);
+      color: rgba(255, 255, 255, 0.85);
+    }
+
+    /* Error */
+    .error-message {
+      display: none;
+      padding: 14px 18px;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      border-radius: 12px;
+      color: #fca5a5;
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+
+    .error-message.visible { display: block; }
+
+    .footer {
+      text-align: center;
+      color: rgba(255, 255, 255, 0.25);
+      font-size: 12px;
+      margin-top: 24px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <div class="logo"><div class="logo-icon">📄</div></div>
+      <h1>PDF Translator</h1>
+      <p class="subtitle">Translate your documents instantly</p>
+
+      <div class="lang-badges">
+        <span class="badge badge-en">English</span>
+        <span class="arrow">→</span>
+        <span class="badge badge-te">తెలుగు</span>
+      </div>
+
+      <!-- Upload Section -->
+      <div id="uploadSection">
+        <div class="drop-zone" id="dropZone">
+          <div class="drop-zone-icon">☁️</div>
+          <div class="drop-zone-text">Drop your PDF here or click to browse</div>
+          <div class="drop-zone-hint">PDF files only</div>
+        </div>
+
+        <input type="file" name="pdf" id="pdfInput" accept=".pdf">
+
+        <div class="file-info" id="fileInfo">
+          <span class="file-info-icon">📎</span>
+          <span class="file-info-name" id="fileName"></span>
+          <button type="button" class="file-info-remove" id="removeFile">✕</button>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <button type="button" class="btn btn-primary" id="submitBtn" disabled>
+          Translate to Telugu
+        </button>
+      </div>
+
+      <!-- Progress Section -->
+      <div class="progress-section" id="progressSection">
+        <div class="progress-header">
+          <span class="progress-percent" id="progressPercent">0%</span>
+          <span class="progress-page" id="progressPage">Page 0 / 0</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progressBar"></div>
+        </div>
+        <div class="progress-message">
+          <div class="spinner"></div>
+          <span id="progressMessage">Starting translation...</span>
+        </div>
+      </div>
+
+      <!-- Done Section -->
+      <div class="done-section" id="doneSection">
+        <div class="done-banner">
+          <div class="done-icon">✅</div>
+          <div class="done-title">Translation Complete!</div>
+          <div class="done-subtitle" id="doneInfo">All pages translated successfully</div>
+        </div>
+        <a class="btn btn-success" id="downloadBtn" href="#" download target="_self">
+          ⬇️ Download Telugu PDF
+        </a>
+        <button type="button" class="btn-reset" id="resetBtn">
+          Translate another PDF
+        </button>
+      </div>
+    </div>
+    <div class="footer">Powered by local NLP • No data leaves your machine</div>
+  </div>
+
+  <script>
+    const dropZone = document.getElementById('dropZone');
+    const pdfInput = document.getElementById('pdfInput');
+    const fileInfo = document.getElementById('fileInfo');
+    const fileName = document.getElementById('fileName');
+    const removeFile = document.getElementById('removeFile');
+    const submitBtn = document.getElementById('submitBtn');
+    const uploadSection = document.getElementById('uploadSection');
+    const progressSection = document.getElementById('progressSection');
+    const progressPercent = document.getElementById('progressPercent');
+    const progressPage = document.getElementById('progressPage');
+    const progressBar = document.getElementById('progressBar');
+    const progressMessage = document.getElementById('progressMessage');
+    const doneSection = document.getElementById('doneSection');
+    const doneInfo = document.getElementById('doneInfo');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const errorMessage = document.getElementById('errorMessage');
+
+    let selectedFile = null;
+
+    // Click to browse
+    dropZone.addEventListener('click', () => pdfInput.click());
+
+    // Drag & drop
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      if (e.dataTransfer.files.length && e.dataTransfer.files[0].type === 'application/pdf') {
+        selectedFile = e.dataTransfer.files[0];
+        showFile(selectedFile);
+      }
+    });
+
+    // File selected
+    pdfInput.addEventListener('change', () => {
+      if (pdfInput.files.length) {
+        selectedFile = pdfInput.files[0];
+        showFile(selectedFile);
+      }
+    });
+
+    function showFile(file) {
+      const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+      fileName.textContent = `${file.name} (${sizeMB} MB)`;
+      dropZone.style.display = 'none';
+      fileInfo.classList.add('visible');
+      submitBtn.disabled = false;
+      errorMessage.classList.remove('visible');
+    }
+
+    // Remove file
+    removeFile.addEventListener('click', () => {
+      pdfInput.value = '';
+      selectedFile = null;
+      dropZone.style.display = 'block';
+      fileInfo.classList.remove('visible');
+      submitBtn.disabled = true;
+    });
+
+    // Submit
+    submitBtn.addEventListener('click', async () => {
+      if (!selectedFile) return;
+
+      errorMessage.classList.remove('visible');
+      submitBtn.disabled = true;
+
+      const formData = new FormData();
+      formData.append('pdf', selectedFile);
+
+      try {
+        const res = await fetch('/translate', { method: 'POST', body: formData });
+        const data = await res.json();
+
+        if (!res.ok) {
+          showError(data.error || 'Upload failed');
+          return;
+        }
+
+        // Start listening for progress
+        uploadSection.style.display = 'none';
+        progressSection.classList.add('visible');
+        listenProgress(data.job_id);
+
+      } catch (err) {
+        showError('Network error: ' + err.message);
+      }
+    });
+
+    function showError(msg) {
+      errorMessage.textContent = msg;
+      errorMessage.classList.add('visible');
+      submitBtn.disabled = false;
+    }
+
+    function listenProgress(jobId) {
+      const pollInterval = setInterval(async () => {
+        try {
+          const res = await fetch(`/status/${jobId}`);
+          if (!res.ok) {
+            clearInterval(pollInterval);
+            showError('Failed to fetch status');
+            progressSection.classList.remove('visible');
+            uploadSection.style.display = 'block';
+            return;
+          }
+
+          const data = await res.json();
+
+          if (data.status === 'error') {
+            clearInterval(pollInterval);
+            progressSection.classList.remove('visible');
+            uploadSection.style.display = 'block';
+            showError(data.message || 'Translation failed');
+            return;
+          }
+
+          // Update progress UI
+          const pct = data.percent || 0;
+          progressPercent.textContent = `${pct}%`;
+          progressBar.style.width = `${pct}%`;
+          progressMessage.textContent = data.message || 'Processing...';
+
+          if (data.total_pages > 0) {
+            progressPage.textContent = `Page ${data.current_page} / ${data.total_pages}`;
+          }
+
+          if (data.status === 'done') {
+            clearInterval(pollInterval);
+            progressSection.classList.remove('visible');
+            doneSection.classList.add('visible');
+            doneInfo.textContent = `${data.total_pages} pages translated successfully`;
+            downloadBtn.href = `/download/${jobId}`;
+          }
+        } catch (err) {
+          console.error("Polling error:", err);
+        }
+      }, 1000); // Poll every 1 second
+    }
+
+    // Reset
+    resetBtn.addEventListener('click', () => {
+      doneSection.classList.remove('visible');
+      uploadSection.style.display = 'block';
+      pdfInput.value = '';
+      selectedFile = null;
+      dropZone.style.display = 'block';
+      fileInfo.classList.remove('visible');
+      submitBtn.disabled = true;
+      progressPercent.textContent = '0%';
+      progressBar.style.width = '0%';
+      progressPage.textContent = 'Page 0 / 0';
+    });
+  </script>
+</body>
+</html>
