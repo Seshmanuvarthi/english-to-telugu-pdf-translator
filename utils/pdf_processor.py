@@ -104,7 +104,8 @@ def process_pdf(input_path, output_path, translate_function, progress_callback=N
                 line_spans = []
                 for span in line["spans"]:
                     text = span["text"]
-                    if not text.strip():
+                    # Do not skip whitespace-only spans! It causes words to squash together.
+                    if not text:
                         continue
                     line_spans.append({
                         "text": text,
@@ -116,7 +117,23 @@ def process_pdf(input_path, output_path, translate_function, progress_callback=N
                     })
 
                 if line_spans:
-                    full_text = "".join(s["text"] for s in line_spans)
+                    full_text = ""
+                    prev_x1 = None
+                    for s in line_spans:
+                        span_text = s["text"]
+                        current_x0 = s["bbox"][0]
+                        
+                        # If there's a significant gap between the last span and this one, insert a space
+                        # to prevent squishing words together.
+                        if prev_x1 is not None:
+                            gap = current_x0 - prev_x1
+                            # 0.15 * font size is a reasonable minimum width for a space character
+                            if gap > s["size"] * 0.15 and not full_text.endswith(" ") and not span_text.startswith(" "):
+                                full_text += " "
+                                
+                        full_text += span_text
+                        prev_x1 = s["bbox"][2]
+
                     lines_data.append({
                         "full_text": full_text,
                         "spans": line_spans,
