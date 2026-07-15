@@ -3,7 +3,7 @@ title: English to Telugu PDF Translator
 emoji: 📄
 colorFrom: blue
 colorTo: green
-sdk: docker
+sdk: gradio
 app_port: 7860
 ---
 # English to Telugu PDF Translator 
