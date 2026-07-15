@@ -1,3 +1,11 @@
+---
+title: English to Telugu PDF Translator
+emoji: 📄
+colorFrom: blue
+colorTo: green
+sdk: docker
+app_port: 7860
+---
 # English to Telugu PDF Translator 
 
 A privacy-preserving, fully offline web-based tool that translates **English PDFs into Telugu** while preserving the original layout, images, background colors, and document formatting.
