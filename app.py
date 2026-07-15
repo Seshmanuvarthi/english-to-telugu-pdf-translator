@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, send_file, Response, jsonify
+from werkzeug.utils import secure_filename
 import os
 import uuid
 import threading
@@ -16,6 +17,7 @@ OUTPUT_FOLDER = os.path.join(BASE_DIR, 'outputs')
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['OUTPUT_FOLDER'] = OUTPUT_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50 MB upload limit
 
 # Create folders if they don't exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -69,15 +71,16 @@ def translate():
     if not uploaded_file.filename.lower().endswith('.pdf'):
         return jsonify({'error': 'Please upload a PDF file'}), 400
 
-    filename = uploaded_file.filename
-    input_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    output_filename = f'telugu_{filename}'
+    job_id = str(uuid.uuid4())
+    safe_name = secure_filename(uploaded_file.filename)
+    if not safe_name:
+        return jsonify({'error': 'Invalid filename'}), 400
+
+    input_path = os.path.join(app.config['UPLOAD_FOLDER'], f'{job_id}_{safe_name}')
+    output_filename = f'telugu_{job_id}.pdf'
     output_path = os.path.join(app.config['OUTPUT_FOLDER'], output_filename)
 
     uploaded_file.save(input_path)
-
-    # Create a job
-    job_id = str(uuid.uuid4())[:8]
     jobs[job_id] = {
         'status': 'queued',
         'current_page': 0,
@@ -140,12 +143,15 @@ def download(job_id):
         return "Translation not complete", 400
 
     file_path = os.path.abspath(job['output_path'])
+    output_filename = job['output_filename']
     if not os.path.exists(file_path):
         return "Output file not found", 404
 
+    jobs.pop(job_id, None)  # Free memory — file is still on disk
     return send_file(file_path, as_attachment=True,
-                     download_name=job['output_filename'])
+                     download_name=output_filename)
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5001, use_reloader=False)
+    port = int(os.environ.get("PORT", 7860))
+    app.run(host='0.0.0.0', port=port, use_reloader=False)

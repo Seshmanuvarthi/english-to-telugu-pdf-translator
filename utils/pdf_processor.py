@@ -140,7 +140,7 @@ def process_pdf(input_path, output_path, translate_function, progress_callback=N
                     })
 
         if not lines_data:
-            report(page_num + 1, f'Page {page_num + 1}: no text, skipping...')
+            report(page_num + 1, f'Page {page_num + 1}: no selectable text (may be a scanned image), skipping...')
             continue
 
         # Step 2: Translate all lines
@@ -175,11 +175,13 @@ def process_pdf(input_path, output_path, translate_function, progress_callback=N
             ascent = font_size * 0.9
             descent = font_size * 0.35
 
-            # Width: extend to right edge of page (with small margin)
+            # Width: use original line width with room for Telugu glyphs, capped at page edge
+            line_width = last_span["bbox"][2] - first_span["bbox"][0]
+            right_edge = min(origin_x + line_width * 1.5, page.rect.width - 5)
             rect = fitz.Rect(
                 origin_x,
                 origin_y - ascent,
-                page.rect.width - 15,
+                right_edge,
                 origin_y + descent,
             )
 
